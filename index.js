@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+const winston = require('winston');
 require('dotenv').config();
 const booksRoute = require('./routes/books');
 
@@ -14,11 +15,13 @@ app.use(express.urlencoded({extended:true})); //objects can have arrays etc
 app.use('/api/books', booksRoute);
 
 //connecting to mongodb atlas
-mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true}).then(()=>{
-    console.log('connected to mongodb atlas');
-}).catch(error =>{
+mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false})
+    .then(()=>{
+        console.log('connected to mongodb atlas');
+    })
+    .catch(error =>{
     console.log('Something wrong happened', error);
-});
+    });
 
 //starting the server
 app.listen(PORT, () =>{
