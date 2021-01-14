@@ -11,19 +11,36 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json()); //tells server we are using json objects
 app.use(express.urlencoded({extended:true})); //objects can have arrays etc
 
+//logger to log errors
+
+const logger = winston.createLogger({
+    level: 'info',
+    transports: [
+      new winston.transports.Console({
+          format:winston.format.combine(
+              winston.format.colorize({all: true})
+          )
+      }),
+      new winston.transports.File({ filename: 'error.log', level:'error' })
+    ],
+    exceptionHandlers: [
+        new winston.transports.File({ filename: 'exceptions.log' })
+      ]
+  });
+
 //routes
 app.use('/api/books', booksRoute);
 
 //connecting to mongodb atlas
 mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false})
     .then(()=>{
-        console.log('connected to mongodb atlas');
+        logger.info('connected to mongodb atlas');
     })
     .catch(error =>{
-    console.log('Something wrong happened', error);
+    logger.error(error);
     });
 
 //starting the server
 app.listen(PORT, () =>{
-    console.log(`Server started at ${PORT}`);
+    logger.info(`Server started at ${PORT}`);
 });
